@@ -30,7 +30,7 @@ class Scraper(QtCore.QThread):
         try:
             r = requests.get(self.url,timeout=5)
         except:
-            self.data = "Connection Refused - Could not Scrape"
+            self.data = "Соединение закрыто - невозжно собрать"
             print("Connection Refused")
             return
         page = BeautifulSoup(r.content, "html.parser")

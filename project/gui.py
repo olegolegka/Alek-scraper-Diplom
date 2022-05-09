@@ -20,23 +20,23 @@ class MainWindow(QMainWindow):
         super(MainWindow,self).__init__(parent)
 
         self.menubar = self.menuBar()
-        help_ = self.menubar.addMenu("Help")
-        aboutAction = QAction("About",self)
+        help_ = self.menubar.addMenu("Помощь")
+        aboutAction = QAction("О программе",self)
         self.shortcut = QShortcut(QKeySequence("Alt+A"),self)
         self.shortcut.activated.connect(self.about)
-        aboutAction.setToolTip("About Py-Scrapper")
+        aboutAction.setToolTip("О Alek-Scrapper")
         aboutAction.triggered.connect(self.about)
 
-        contributeAction = QAction("Contribute Or Report Issues",self)
+        contributeAction = QAction("Если заметили ошибку",self)
         self.shortcut = QShortcut(QKeySequence("Alt+C"),self)
         self.shortcut.activated.connect(self.contribute)
-        contributeAction.setToolTip("Opens Repository")
+        contributeAction.setToolTip("Данный репозиторий")
         contributeAction.triggered.connect(self.contribute)
 
-        usageAction = QAction("Usage",self)
+        usageAction = QAction("Использование",self)
         self.shortcut = QShortcut(QKeySequence("Alt+U"),self)
         self.shortcut.activated.connect(self.usage)
-        usageAction.setToolTip("Instructions for Using the tool")
+        usageAction.setToolTip("Инструкция для пользования")
         usageAction.triggered.connect(self.usage)
 
         help_.addAction(aboutAction)
@@ -51,17 +51,17 @@ class MainWindow(QMainWindow):
         grid = QGridLayout()
 
         font = QFont("Times",13)
-        self.urlLabel = QLabel("Url:")
+        self.urlLabel = QLabel("Ссылка:")
         self.urlLabel.setFont(font)
         self.urlInput = QLineEdit()
         self.urlInput.setFont(font)
-        self.selectorLabel = QLabel("Selector:")
+        self.selectorLabel = QLabel("Тэг селектор:")
         self.selectorLabel.setFont(font)
         self.selectorInput = QLineEdit()
         self.selectorInput.setFont(font)
         self.button = QPushButton()
         self.button.setFont(font)
-        self.button.setText("Scrape It")
+        self.button.setText("Начать")
         self.button.setFixedWidth(100)
         self.button.clicked.connect(self.modifyUI)
 
@@ -87,7 +87,7 @@ class MainWindow(QMainWindow):
         self.scriptBrowser.setFont(QFont("Courier",13))
         self.scriptBrowser.setTextColor(QColor("#C5C8C6"))
         self.scriptBrowser.setStyleSheet("background-color: #1d1f21")
-        self.scriptBrowser.setText("Python Script will be generated here")
+        self.scriptBrowser.setText("Здесь генерируется Скрипт")
         tab1layout.addWidget(self.scriptBrowser)
         self.tab.setTabText(0,"Python Script")
         self.tab.setFont(font)
@@ -96,23 +96,23 @@ class MainWindow(QMainWindow):
         tab2layout = QVBoxLayout()
         self.web = QWebEngineView()
         tab2layout.addWidget(self.web)
-        self.tab.setTabText(1,"Webpage")
+        self.tab.setTabText(1,"Web-страница")
         self.tab2.setLayout(tab2layout)
 
         tab3layout = QVBoxLayout()
         self.dataBrowser = QTextBrowser()
         self.dataBrowser.setFont(QFont("Courier",13))
         self.dataBrowser.setTextColor(QColor("#C5C8C6"))
-        self.dataBrowser.append("Scraped Data: \n\n")
+        self.dataBrowser.append("Собранная информация: \n\n")
         self.dataBrowser.setStyleSheet("background-color: #1d1f21")
         tab3layout.addWidget(self.dataBrowser)
-        self.tab.setTabText(2,"Scraping Results")
+        self.tab.setTabText(2,"Результат")
         self.tab3.setLayout(tab3layout)
 
         mainlayout.addWidget(self.tab)
         self.dialog.setLayout(mainlayout)
         self.setCentralWidget(self.dialog)
-        self.setWindowTitle("Py-Scrapper")
+        self.setWindowTitle("Alek-Scrapper")
 
     def about(self):
         """ Defines the action when the about item under help menu is clicked.
@@ -121,10 +121,10 @@ class MainWindow(QMainWindow):
         """
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Information)
-        msg.setText("Py-Scrapper is a GUI tool for scraping data off webpages recursively."+"\n\nDeveloped Using Python 3.5.2 and PyQt5.\n")
-        info = "Visit the <a href=\"https://github.com/ankit0905/py-scraper\">Source code</a>"
+        msg.setText("Alek-Scrapper - это универсальное средство сбора информации с интернет-источников."+"\n\nСозданное с помощью Python 3.5.2 и PyQt5.\n")
+        info = "Visit the <a href=\"https://github.com/olegolegka\">Мой репозиторий</a>"
         msg.setInformativeText(info)
-        msg.setWindowTitle("About")
+        msg.setWindowTitle("О программе")
         msg.setStandardButtons(QMessageBox.Ok)
         msg.exec_()
 
@@ -133,7 +133,7 @@ class MainWindow(QMainWindow):
 
             Opens the source code repository.
         """
-        link = "https://github.com/ankit0905/py-scraper"
+        link = "https://github.com/olegolegka"
         QDesktopServices.openUrl(QUrl(link))
 
     def usage(self):
@@ -169,7 +169,7 @@ class MainWindow(QMainWindow):
         details = QMessageBox()
         details.setText(text)
         details.setIcon(QMessageBox.Information)
-        details.setWindowTitle("Usage")
+        details.setWindowTitle("Использование")
         details.exec_()
 
     def modifyUI(self):
@@ -192,7 +192,8 @@ class MainWindow(QMainWindow):
         self.scraper_.start()
 
     def addScriptAndData(self):
-        """ Method which adds the script and scraped data to respective tabs.
+        """ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        Method which adds the script and scraped data to respective tabs.
 
             Syntax highlighter instance is created and functionality added to script Tab.
         """
