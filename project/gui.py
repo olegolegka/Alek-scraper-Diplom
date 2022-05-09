@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-# -*- coding: utf-8 -*-
 import sys
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -64,12 +62,25 @@ class MainWindow(QMainWindow):
         self.button.setText("Начать")
         self.button.setFixedWidth(100)
         self.button.clicked.connect(self.modifyUI)
-
+        #кнопка сохранения
+        self.savebutton = QPushButton ()
+        self.savebutton.setFont (font)
+        self.savebutton.setText ("Cохранить")
+        self.savebutton.setFixedWidth (130)
+        #self.savebutton.clicked.connect (self.modifyUI)
+        # кнопка сохранения в монго
+        self.saveMongoButton = QPushButton ()
+        self.saveMongoButton.setFont (font)
+        self.saveMongoButton.setText ("Cохранить в БД")
+        self.saveMongoButton.setFixedWidth (180)
+        # self.savebutton.clicked.connect (self.modifyUI)
         grid.addWidget(self.urlLabel,0,0)
         grid.addWidget(self.urlInput,0,1)
         grid.addWidget(self.selectorLabel,1,0)
         grid.addWidget(self.selectorInput,1,1)
         grid.addWidget(self.button,2,1)
+        grid.addWidget (self.savebutton, 2, 2)
+        grid.addWidget (self.saveMongoButton, 2, 3)
 
         mainlayout.addLayout(grid)
 
@@ -142,27 +153,23 @@ class MainWindow(QMainWindow):
             Displays a message box showing the instrucions of Usage.
         """
         text = """
-        <p>In the URL input box, copy the web address of the webpage you want to scrape.</p>
-        <p>Then, type the appropriate selector depending upon the data to be scraped in the selector input box. <i>(See below on how the selector should look like)</i></p>
-        <h4>How to Use Selectors</h4>
-        <p>The Selector should be a valid CSSSelector. For recursive scraping, follow a hierarchical way.
-        <ul><li>&nbsp;&nbsp;Use the '->' symbol to separate different elements.<li>
-        <li>&nbsp;&nbsp;Wheneven you want some to scrape sibling elements - write them in '()' separating by comma.</li></ul></p>
+        <p>В окно "Ссылка" вставьте Url адрес ресурса с которого хотите собрать информацию.</p>
+        <p>В окно "Тэг селектор" вставьте тэг с классом(не обязательно) той части страницы информацию которого хотите собрать. <i>(Ниже инструкция как пользоваться селекторами)</i></p>
+        <h4>Как использовать селекторы</h4>
+        <p>Селектор должен быть валидным CSS селектором. Для рекурсивного сбора соблюдайте иерархию тегов.
+        <ul><li>&nbsp;&nbsp;Используйте '->' символ чтобы разделить разные тэги.<li>
+        <li>&nbsp;&nbsp;Если вы хотите собрать элементы одного уровня заключите их в "()" и разделите запятой.</li></ul></p>
         <br/></br>
-        <p><b><u>EXAMPLES:</u></b></p>
+        <p><b><u>ПРИМЕРЫ:</u></b></p>
         <ol>
         <li>
         <p><i>a.category -> a.subcategory -> div.item -> (p.title, p.description)</i></p>
-        <p>This will scrape the text of the paragraphs will class 'title' and 'description' for all the items of each subcategory and category classed links starting with the url given as input.</p>
+        <p>Данная команда соберет текст с параграфа с классами 'title' и 'description' для каждого элемента каждой категории и подкатегории.</p>
         </li>
         <li>
-        <p>You can also use another way of using nested CSS Selectors by using ">". </p>
-        <p>For example, if you want to scrape the text of a span tag with class "text" inside a div with class "details", use something like:</p>
+        <p>Также можно использовать другой путь для разделения вложенных CSS селекторов используя ">". </p>
+        <p>Для примера, если вы хотите собрать текст span элемента с классом "text" который лежит внутри элемента div с классом "details", используйте что-то вроде этого:</p>
         <p><i>div.details > span.text</i></p>
-        </li>
-        <li>
-        <p><i>a.organization-card__link -> (h3.banner__title, li.organization__tag--technology)</i></p>
-        <p>The above selector was used to scrape the used technologies of all the GSOC organization recursively from <a href="https://summerofcode.withgoogle.com/archive/2016/organizations/">here</a>.</p>
         </li>
         </ol>
         """
@@ -198,6 +205,7 @@ class MainWindow(QMainWindow):
             Syntax highlighter instance is created and functionality added to script Tab.
         """
         self.dataBrowser.setText(self.scraper_.data.encode('utf-8').decode('utf-8'))
+        print(self.scraper_.data.encode('utf-8').decode('utf-8'))
         self.highlight = syntax.PythonHighlighter(self.scriptBrowser.document())
         self.scriptBrowser.setText(self.script)
 
