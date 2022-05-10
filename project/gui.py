@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
 import sys
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -67,7 +69,7 @@ class MainWindow(QMainWindow):
         self.savebutton.setFont (font)
         self.savebutton.setText ("Cохранить")
         self.savebutton.setFixedWidth (130)
-        #self.savebutton.clicked.connect (self.modifyUI)
+        self.savebutton.clicked.connect (self.saveSCV)
         # кнопка сохранения в монго
         self.saveMongoButton = QPushButton ()
         self.saveMongoButton.setFont (font)
@@ -91,7 +93,6 @@ class MainWindow(QMainWindow):
         self.tab.addTab(self.tab1, "1")
         self.tab.addTab(self.tab2,"2")
         self.tab.addTab(self.tab3,"3")
-
         tab1layout = QVBoxLayout()
         self.scriptBrowser = QTextBrowser()
         self.scriptBrowser.append("")
@@ -205,9 +206,14 @@ class MainWindow(QMainWindow):
             Syntax highlighter instance is created and functionality added to script Tab.
         """
         self.dataBrowser.setText(self.scraper_.data.encode('utf-8').decode('utf-8'))
-        print(self.scraper_.data.encode('utf-8').decode('utf-8'))
         self.highlight = syntax.PythonHighlighter(self.scriptBrowser.document())
         self.scriptBrowser.setText(self.script)
+
+    def saveSCV(self):
+        self.data  = self.scraper_.data.encode('utf-8').decode('utf-8')
+        print(self.data)
+        with open ('test.csv', 'w') as file:
+            file.write (self.data)
 
 def main():
     app = QApplication(sys.argv)
