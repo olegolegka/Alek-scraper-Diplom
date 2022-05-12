@@ -13,9 +13,10 @@ class Scraper(QtCore.QThread):
         It inherits from the class QThread to facilitate multithreading
     """
     threadChange = QtCore.pyqtSignal(str)
-    def __init__(self,link,selectors):
+    def __init__(self,link,selectors,sep):
         QtCore.QThread.__init__(self)
         self.url = link
+        self.sep = sep
         self.CSSSelectors = selectors
 
     def run(self):
@@ -27,17 +28,22 @@ class Scraper(QtCore.QThread):
             Emits a SIGNAL threadChange to notify exiting of thread.
         """
         self.data = ""
+        separator = int(self.sep)
         try:
-            r = requests.get(self.url,timeout=5)
-        except:
+            for i in range(0,separator,1):
+                url = self.url
+                url = url + str(i+1)
+                self.CSSSelectors = "".join(self.CSSSelectors)
+                print(self.CSSSelectors)
+                r = requests.get(url,timeout=5)
+                page = BeautifulSoup (r.content, "html.parser")
+                self.modify ()
+                self.scrape (url, page, 0, len (self.CSSSelectors) - 1, self.CSSSelectors)
+                self.threadChange.emit ("threadChange")
+                print ("Scrapping done from: "+ url)
+        except Exception as e:
             self.data = "Соединение закрыто - невозжно собрать"
-            print("Connection Refused")
-            return
-        page = BeautifulSoup(r.content, "html.parser")
-        self.modify()
-        self.scrape(self.url,page,0,len(self.CSSSelectors)-1,self.CSSSelectors)
-        self.threadChange.emit("threadChange")
-        print("Scrapping done")
+            print(e)
 
     def modify(self):
         """ Modifies the string selector and converts it into list of selectors
@@ -45,6 +51,7 @@ class Scraper(QtCore.QThread):
         selectors = self.CSSSelectors.split('->')
         for it in range(len(selectors)):
             selectors[it] = selectors[it].lstrip().rstrip()
+
         self.CSSSelectors = selectors
 
     def scrape(self,url,soup,index,hi,selectors):

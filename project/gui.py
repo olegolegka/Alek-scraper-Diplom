@@ -55,6 +55,9 @@ class MainWindow(QMainWindow):
         self.urlLabel.setFont(font)
         self.urlInput = QLineEdit()
         self.urlInput.setFont(font)
+        self.sepInput = QLineEdit ()
+        self.sepInput.setFont (font)
+        self.sepInput.setFixedSize(70,30)
         self.selectorLabel = QLabel("Тэг селектор:")
         self.selectorLabel.setFont(font)
         self.selectorInput = QLineEdit()
@@ -78,6 +81,7 @@ class MainWindow(QMainWindow):
         # self.savebutton.clicked.connect (self.modifyUI)
         grid.addWidget(self.urlLabel,0,0)
         grid.addWidget(self.urlInput,0,1)
+        grid.addWidget (self.sepInput, 0, 2)
         grid.addWidget(self.selectorLabel,1,0)
         grid.addWidget(self.selectorInput,1,1)
         grid.addWidget(self.button,2,1)
@@ -189,13 +193,11 @@ class MainWindow(QMainWindow):
             As soon as scraping finishes, the method addScriptAndData() is called.
         """
         url = self.urlInput.text()
+        sep = self.sepInput.text()
         selectors = self.selectorInput.text()
         self.web.load(QUrl(url))
-        print("Webpage Loaded \n")
-
+        self.scraper_ = scraper.Scraper (str (url), str (selectors),str(sep))
         self.script = ScriptGenerator(url,selectors).generate()
-
-        self.scraper_ = scraper.Scraper(str(url),str(selectors))
         self.scraper_.threadChange.connect(self.addScriptAndData)
         self.scraper_.start()
 
