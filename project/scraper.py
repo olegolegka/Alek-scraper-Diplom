@@ -33,7 +33,6 @@ class Scraper(QtCore.QThread):
             for i in range(0,separator,1):
                 url = self.url
                 url = url + str(i+1)
-                self.CSSSelectors = "".join(self.CSSSelectors)
                 print(self.CSSSelectors)
                 r = requests.get(url,timeout=5)
                 page = BeautifulSoup (r.content, "html.parser")
@@ -48,10 +47,13 @@ class Scraper(QtCore.QThread):
     def modify(self):
         """ Modifies the string selector and converts it into list of selectors
         """
-        selectors = self.CSSSelectors.split('->')
+
+        if isinstance(self.CSSSelectors,str):
+            selectors = self.CSSSelectors.split('->')
+        else:
+            selectors = self.CSSSelectors
         for it in range(len(selectors)):
             selectors[it] = selectors[it].lstrip().rstrip()
-
         self.CSSSelectors = selectors
 
     def scrape(self,url,soup,index,hi,selectors):

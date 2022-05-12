@@ -18,7 +18,6 @@ class MainWindow(QMainWindow):
     """
     def __init__(self, parent=None):
         super(MainWindow,self).__init__(parent)
-
         self.menubar = self.menuBar()
         help_ = self.menubar.addMenu("Помощь")
         aboutAction = QAction("О программе",self)
