@@ -2,7 +2,8 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 from PyQt5 import QtCore
-
+import pymongo
+import re
 class Scraper(QtCore.QThread):
     """ Class for scraping webpages
 
@@ -29,6 +30,7 @@ class Scraper(QtCore.QThread):
         """
         self.data = ""
         separator = int(self.sep)
+
         try:
             for i in range(0,separator,1):
                 url = self.url
@@ -47,13 +49,19 @@ class Scraper(QtCore.QThread):
     def modify(self):
         """ Modifies the string selector and converts it into list of selectors
         """
-
+        self.savesel1 = []
         if isinstance(self.CSSSelectors,str):
             selectors = self.CSSSelectors.split('->')
         else:
             selectors = self.CSSSelectors
         for it in range(len(selectors)):
             selectors[it] = selectors[it].lstrip().rstrip()
+            if selectors[it].startswith('('):
+                self.savesel1 = selectors[it]
+                self.savesel1 = self.savesel1[1:len(self.savesel1)-1]
+                self.savesel1 = self.savesel1.split(',')
+            else:
+                self.savesel1.append(selectors[it])
         self.CSSSelectors = selectors
 
     def scrape(self,url,soup,index,hi,selectors):
@@ -99,6 +107,9 @@ class Scraper(QtCore.QThread):
                 new_soup = soup.select(selectors[index])
                 for it in range(len(new_soup)):
                     self.scrape(url,new_soup[it],index+1,hi,selectors)
+    def saveToMongo(self):
+        print(self.savesel1)
+
 #Testing done on following
 #inp = "a.organization-card__link -> (h3.banner__title,li.organization__tag--technology)"
 #link = "https://summerofcode.withgoogle.com/archive/2016/organizations/"

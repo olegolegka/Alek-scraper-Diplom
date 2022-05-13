@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 import sys
+from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWebEngineWidgets import *
@@ -77,7 +78,7 @@ class MainWindow(QMainWindow):
         self.saveMongoButton.setFont (font)
         self.saveMongoButton.setText ("Cохранить в БД")
         self.saveMongoButton.setFixedWidth (180)
-        # self.savebutton.clicked.connect (self.modifyUI)
+        self.saveMongoButton.clicked.connect (self.btnClicked)
         grid.addWidget(self.urlLabel,0,0)
         grid.addWidget(self.urlInput,0,1)
         grid.addWidget (self.sepInput, 0, 2)
@@ -210,11 +211,59 @@ class MainWindow(QMainWindow):
         self.highlight = syntax.PythonHighlighter(self.scriptBrowser.document())
         self.scriptBrowser.setText(self.script)
 
+    def btnClicked(self):
+        savesel = self.scraper_.savesel1
+        self.chile_Win = ChildWindow (savesel)
+        self.chile_Win.move (self.x () + self.saveMongoButton.geometry ().x () + 1,
+                             self.y () + self.saveMongoButton.geometry ().y () + self.saveMongoButton.height () + 35)
+        self.chile_Win.show ()
+
     def saveSCV(self):
         self.data  = self.scraper_.data.encode('utf-8').decode('utf-8')
         print(self.data)
         with open ('test.csv', 'w') as file:
             file.write (self.data)
+
+
+class ChildWindow (QDialog):
+    def __init__(self,savesel, parent=None):
+        super (ChildWindow, self).__init__ (parent)
+        self.savesel = savesel
+        font1 = QFont ("Times", 13)
+        self.verticalLayout = QtWidgets.QVBoxLayout (self)
+        self.verticalLayout.setObjectName ("verticalLayout")
+        self.resize (600, 600)
+        self.table = QTableWidget(self)
+        self.table.setColumnCount(2)     #Set three columns
+        self.table.setRowCount(len(self.savesel))
+        row = 0
+        col = 1
+        for tup in self.savesel:
+            cellinfo = QTableWidgetItem (tup)
+            self.table.setItem(row,col,cellinfo)
+            row+=1
+        self.table.setHorizontalHeaderLabels (["Название", "Тэг"])
+        self.verticalLayout.addWidget(self.table)
+
+        self.acceptButton = QtWidgets.QPushButton (self)
+        self.acceptButton.setObjectName ("acceptButton")
+        self.acceptButton.clicked.connect (self.saveMongo)
+        self.verticalLayout.addWidget (self.acceptButton)
+
+        self.cancelButton = QtWidgets.QPushButton(self)
+        self.cancelButton.setObjectName("cancelButton")
+        self.cancelButton.clicked.connect (self.btnClosed)
+        self.verticalLayout.addWidget(self.cancelButton)
+
+        self.cancelButton.setText("Отмена")
+        self.setWindowTitle ("Сохранить в бд")
+        self.acceptButton.setText ("Сохранить")
+    def btnClosed(self):
+        self.close ()
+
+    def saveMongo(self):
+        pass
+
 
 def main():
     app = QApplication(sys.argv)
