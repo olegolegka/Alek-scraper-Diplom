@@ -14,7 +14,7 @@ class Scraper(QtCore.QThread):
         It inherits from the class QThread to facilitate multithreading
     """
     threadChange = QtCore.pyqtSignal(str)
-    def __init__(self,link,selectors,sep):
+    def __init__(self,link,selectors,sep = None):
         QtCore.QThread.__init__(self)
         self.url = link
         self.sep = sep
@@ -29,13 +29,13 @@ class Scraper(QtCore.QThread):
             Emits a SIGNAL threadChange to notify exiting of thread.
         """
         self.data = ""
+        self.list_of_selectors = []
         separator = int(self.sep)
 
         try:
             for i in range(0,separator,1):
                 url = self.url
                 url = url + str(i+1)
-                print(self.CSSSelectors)
                 r = requests.get(url,timeout=5)
                 page = BeautifulSoup (r.content, "html.parser")
                 self.modify ()
@@ -74,6 +74,7 @@ class Scraper(QtCore.QThread):
             selectors : the actual list of selectors (created from user input)
         """
         if index > hi:
+            self.list_of_selectors.append((selectors[hi],soup.get_text()))
             text = soup.get_text()
             text = str(text.encode('utf-8').decode('utf-8'))
             self.data += text.lstrip().rstrip()+'\n'
@@ -90,7 +91,7 @@ class Scraper(QtCore.QThread):
                     print("Connection Refused")
                     return
                 new_soup = BeautifulSoup(req.content,"html.parser")
-                self.scrape(new_url,new_soup,index+1,hi,selectors)
+                self.scrape(new_url,new_soup,index+1,hi,selectors)#1
         else:
             if selectors[index].startswith('('):
                 lis = selectors[index]
@@ -101,15 +102,15 @@ class Scraper(QtCore.QThread):
                 for selector in lis:
                     new_soup = soup.select(selector)
                     for it in range(len(new_soup)):
-                        self.scrape(url,new_soup[it],index+1,hi,selectors)
+                        self.list_of_selectors.append((selector,new_soup[it].get_text()))
+                        self.scrape(url,new_soup[it],index+1,hi,selectors)#2
                 self.data += '\n\n'
             else:
                 new_soup = soup.select(selectors[index])
                 for it in range(len(new_soup)):
-                    self.scrape(url,new_soup[it],index+1,hi,selectors)
-    def saveToMongo(self):
-        print(self.savesel1)
-
+                    self.scrape(url,new_soup[it],index+1,hi,selectors)#3
+    def imgDownload(self):
+        url = self.url
 #Testing done on following
 #inp = "a.organization-card__link -> (h3.banner__title,li.organization__tag--technology)"
 #link = "https://summerofcode.withgoogle.com/archive/2016/organizations/"

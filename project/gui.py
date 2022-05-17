@@ -8,6 +8,7 @@ from PyQt5.QtWebEngineWidgets import *
 from PyQt5.QtWidgets import *
 from scriptGenerator import ScriptGenerator
 import scraper, syntax
+import pymongo
 
 class MainWindow(QMainWindow):
     """ The class that defines the structure of the application's GUI.
@@ -79,11 +80,18 @@ class MainWindow(QMainWindow):
         self.saveMongoButton.setText ("Cохранить в БД")
         self.saveMongoButton.setFixedWidth (180)
         self.saveMongoButton.clicked.connect (self.btnClicked)
+        #кнопка скачивания картинок
+        self.saveIMG = QPushButton ()
+        self.saveIMG.setFont (font)
+        self.saveIMG.setText ("Cохранить картинки")
+        self.saveIMG.setFixedWidth (220)
+        self.saveIMG.clicked.connect (self.saveImg)
         grid.addWidget(self.urlLabel,0,0)
         grid.addWidget(self.urlInput,0,1)
         grid.addWidget (self.sepInput, 0, 2)
         grid.addWidget(self.selectorLabel,1,0)
         grid.addWidget(self.selectorInput,1,1)
+        grid.addWidget (self.saveIMG, 0, 3)
         grid.addWidget(self.button,2,1)
         grid.addWidget (self.savebutton, 2, 2)
         grid.addWidget (self.saveMongoButton, 2, 3)
@@ -213,35 +221,46 @@ class MainWindow(QMainWindow):
 
     def btnClicked(self):
         savesel = self.scraper_.savesel1
-        self.chile_Win = ChildWindow (savesel)
+        list_of_sel = self.scraper_.list_of_selectors
+        self.chile_Win = ChildWindow (savesel,list_of_sel)
         self.chile_Win.move (self.x () + self.saveMongoButton.geometry ().x () + 1,
                              self.y () + self.saveMongoButton.geometry ().y () + self.saveMongoButton.height () + 35)
         self.chile_Win.show ()
 
     def saveSCV(self):
         self.data  = self.scraper_.data.encode('utf-8').decode('utf-8')
-        print(self.data)
         with open ('test.csv', 'w') as file:
             file.write (self.data)
+    def saveImg(self):
+        pass
+        imgurl = self.urlInput.text ()
 
 
 class ChildWindow (QDialog):
-    def __init__(self,savesel, parent=None):
+    def __init__(self,savesel,list_of_sel, parent=None):
         super (ChildWindow, self).__init__ (parent)
+        font = QFont ("Times", 13)
         self.savesel = savesel
+        self.list_of_sel = list_of_sel
         font1 = QFont ("Times", 13)
         self.verticalLayout = QtWidgets.QVBoxLayout (self)
         self.verticalLayout.setObjectName ("verticalLayout")
         self.resize (600, 600)
+        self.collectionLabel = QLabel ("Коллекция:")
+        self.collectionLabel.setFont (font)
+        self.collectionInput = QLineEdit ()
+        self.collectionInput.setFont (font)
+        self.verticalLayout.addWidget (self.collectionLabel)
+        self.verticalLayout.addWidget (self.collectionInput)
         self.table = QTableWidget(self)
-        self.table.setColumnCount(2)     #Set three columns
+        self.table.setColumnCount(2)
         self.table.setRowCount(len(self.savesel))
-        row = 0
-        col = 1
+        self.row = 0
+        self.col = 1
         for tup in self.savesel:
             cellinfo = QTableWidgetItem (tup)
-            self.table.setItem(row,col,cellinfo)
-            row+=1
+            self.table.setItem(self.row,self.col,cellinfo)
+            self.row+=1
         self.table.setHorizontalHeaderLabels (["Название", "Тэг"])
         self.verticalLayout.addWidget(self.table)
 
@@ -262,8 +281,14 @@ class ChildWindow (QDialog):
         self.close ()
 
     def saveMongo(self):
-        pass
 
+        client = pymongo.MongoClient('mongodb://localhost:27017/')
+        db = client.user_db
+        collection = db[self.collectionInput.text()]
+        for i in range (len (self.savesel)):
+            for tup in self.list_of_sel:
+                    colDict = {self.table.item(i,0).text():tup[1]}
+                    collection.insert_one (colDict).inserted_id
 
 def main():
     app = QApplication(sys.argv)
