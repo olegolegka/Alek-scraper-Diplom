@@ -7,8 +7,10 @@ from PyQt5.QtGui import *
 from PyQt5.QtWebEngineWidgets import *
 from PyQt5.QtWidgets import *
 from scriptGenerator import ScriptGenerator
-import scraper, syntax
+import scraper, syntax, img_downloader
 import pymongo
+import qtmodern.styles
+import qtmodern.windows
 
 class MainWindow(QMainWindow):
     """ The class that defines the structure of the application's GUI.
@@ -146,7 +148,7 @@ class MainWindow(QMainWindow):
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Information)
         msg.setText("Alek-Scrapper - это универсальное средство сбора информации с интернет-источников."+"\n\nСозданное с помощью Python 3.5.2 и PyQt5.\n")
-        info = "Visit the <a href=\"https://github.com/olegolegka\">Мой репозиторий</a>"
+        info = "Зайдите на <a href=\"https://github.com/olegolegka\">Мой репозиторий</a>"
         msg.setInformativeText(info)
         msg.setWindowTitle("О программе")
         msg.setStandardButtons(QMessageBox.Ok)
@@ -200,14 +202,23 @@ class MainWindow(QMainWindow):
             Third, scraper instance is created and scraping starts on a separate thread.
             As soon as scraping finishes, the method addScriptAndData() is called.
         """
-        url = self.urlInput.text()
-        sep = self.sepInput.text()
-        selectors = self.selectorInput.text()
-        self.web.load(QUrl(url))
-        self.scraper_ = scraper.Scraper (str (url), str (selectors),str(sep))
-        self.script = ScriptGenerator(url,selectors).generate()
-        self.scraper_.threadChange.connect(self.addScriptAndData)
-        self.scraper_.start()
+        if self.urlInput.isModified() and self.sepInput.isModified() and self.selectorInput.isModified():
+            url = self.urlInput.text()
+            sep = self.sepInput.text()
+            selectors = self.selectorInput.text()
+            self.web.load(QUrl(url))
+            self.scraper_ = scraper.Scraper (str (url), str (selectors),str(sep))
+            self.script = ScriptGenerator(url,selectors).generate()
+            self.scraper_.threadChange.connect(self.addScriptAndData)
+            self.scraper_.start()
+        else:
+            msg1 = QMessageBox ()
+            msg1.setIcon (QMessageBox.Information)
+            msg1.setText (
+                "Произошла ошибка" + "\n\nПроверьте введенные данные\n")
+            msg1.setWindowTitle ("Ошибка")
+            msg1.setStandardButtons (QMessageBox.Ok)
+            msg1.exec_ ()
 
     def addScriptAndData(self):
         """ !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -220,21 +231,49 @@ class MainWindow(QMainWindow):
         self.scriptBrowser.setText(self.script)
 
     def btnClicked(self):
-        savesel = self.scraper_.savesel1
-        list_of_sel = self.scraper_.list_of_selectors
-        self.chile_Win = ChildWindow (savesel,list_of_sel)
-        self.chile_Win.move (self.x () + self.saveMongoButton.geometry ().x () + 1,
-                             self.y () + self.saveMongoButton.geometry ().y () + self.saveMongoButton.height () + 35)
-        self.chile_Win.show ()
+        try:
+            savesel = self.scraper_.savesel1
+            list_of_sel = self.scraper_.list_of_selectors
+            self.chile_Win = ChildWindow (savesel,list_of_sel)
+            self.chile_Win.move (self.x () + self.saveMongoButton.geometry ().x () + 1,
+                                 self.y () + self.saveMongoButton.geometry ().y () + self.saveMongoButton.height () + 35)
+            self.chile_Win.show ()
+        except:
+            msg1 = QMessageBox ()
+            msg1.setIcon (QMessageBox.Information)
+            msg1.setText (
+                "Произошла ошибка" + "\n\nПроверьте введенные данные\n")
+            msg1.setWindowTitle ("Ошибка")
+            msg1.setStandardButtons (QMessageBox.Ok)
+            msg1.exec_ ()
 
     def saveSCV(self):
-        self.data  = self.scraper_.data.encode('utf-8').decode('utf-8')
-        with open ('test.csv', 'w') as file:
-            file.write (self.data)
-    def saveImg(self):
-        pass
-        imgurl = self.urlInput.text ()
+        try:
+            self.data  = self.scraper_.data.encode('utf-8').decode('utf-8')
+            with open ('test.csv', 'w') as file:
+                file.write (self.data)
+        except:
+            msg1 = QMessageBox ()
+            msg1.setIcon (QMessageBox.Information)
+            msg1.setText (
+                "Произошла ошибка" + "\n\nПроверьте введенные данные\n")
+            msg1.setWindowTitle ("Ошибка")
+            msg1.setStandardButtons (QMessageBox.Ok)
+            msg1.exec_ ()
 
+    def saveImg(self):
+        if self.urlInput.isModified () and self.sepInput.isModified ():
+            url = self.urlInput.text ()
+            sep = self.sepInput.text ()
+            img_downloader.img_Downloader(url,sep)
+        else:
+            msg1 = QMessageBox ()
+            msg1.setIcon (QMessageBox.Information)
+            msg1.setText (
+                "Произошла ошибка" + "\n\nПроверьте введенные данные\n")
+            msg1.setWindowTitle ("Ошибка")
+            msg1.setStandardButtons (QMessageBox.Ok)
+            msg1.exec_ ()
 
 class ChildWindow (QDialog):
     def __init__(self,savesel,list_of_sel, parent=None):
@@ -281,19 +320,29 @@ class ChildWindow (QDialog):
         self.close ()
 
     def saveMongo(self):
-
-        client = pymongo.MongoClient('mongodb://localhost:27017/')
-        db = client.user_db
-        collection = db[self.collectionInput.text()]
-        for i in range (len (self.savesel)):
-            for tup in self.list_of_sel:
-                    colDict = {self.table.item(i,0).text():tup[1]}
-                    collection.insert_one (colDict).inserted_id
-
+        try:
+            client = pymongo.MongoClient('mongodb://localhost:27017/')
+            db = client.user_db
+            collection = db[self.collectionInput.text()]
+            for i in range (len (self.savesel)):
+                for tup in self.list_of_sel:
+                        colDict = {self.table.item(i,0).text():tup[1]}
+                        collection.insert_one (colDict).inserted_id
+        except:
+            msg2 = QMessageBox ()
+            msg2.setIcon (QMessageBox.Information)
+            msg2.setText (
+                "Произошла ошибка при сохранении" + "\n\nПроверьте введенные данные или связь с базой данных\n")
+            msg2.setWindowTitle ("Ошибка")
+            msg2.setStandardButtons (QMessageBox.Ok)
+            msg2.exec_ ()
 def main():
     app = QApplication(sys.argv)
+    app.setStyle("Fusion")
     window = MainWindow()
-    window.show()
+    qtmodern.styles.dark (app)
+    mw = qtmodern.windows.ModernWindow (window)
+    mw.show()
     app.exec_()
 
 if __name__ == '__main__':

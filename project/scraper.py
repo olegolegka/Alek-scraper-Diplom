@@ -2,8 +2,6 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 from PyQt5 import QtCore
-import pymongo
-import re
 class Scraper(QtCore.QThread):
     """ Class for scraping webpages
 
@@ -109,8 +107,6 @@ class Scraper(QtCore.QThread):
                 new_soup = soup.select(selectors[index])
                 for it in range(len(new_soup)):
                     self.scrape(url,new_soup[it],index+1,hi,selectors)#3
-    def imgDownload(self):
-        url = self.url
 #Testing done on following
 #inp = "a.organization-card__link -> (h3.banner__title,li.organization__tag--technology)"
 #link = "https://summerofcode.withgoogle.com/archive/2016/organizations/"
