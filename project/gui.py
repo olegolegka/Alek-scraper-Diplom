@@ -11,7 +11,7 @@ import scraper, syntax, img_downloader
 import pymongo
 import qtmodern.styles
 import qtmodern.windows
-
+from datetime import datetime
 class MainWindow(QMainWindow):
     """ The class that defines the structure of the application's GUI.
 
@@ -182,9 +182,9 @@ class MainWindow(QMainWindow):
         <p>Данная команда соберет текст с параграфа с классами 'title' и 'description' для каждого элемента каждой категории и подкатегории.</p>
         </li>
         <li>
-        <p>Также можно использовать другой путь для разделения вложенных CSS селекторов используя ">". </p>
+        <p>Также можно использовать другой путь для разделения вложенных CSS селекторов используя "->". </p>
         <p>Для примера, если вы хотите собрать текст span элемента с классом "text" который лежит внутри элемента div с классом "details", используйте что-то вроде этого:</p>
-        <p><i>div.details > span.text</i></p>
+        <p><i>div.details -> span.text</i></p>
         </li>
         </ol>
         """
@@ -250,7 +250,9 @@ class MainWindow(QMainWindow):
     def saveSCV(self):
         try:
             self.data  = self.scraper_.data.encode('utf-8').decode('utf-8')
-            with open ('test.csv', 'w') as file:
+            date = str(datetime.now()).replace(" ","-").replace(":","-")
+            print(date,type(date))
+            with open ('{0}.csv'.format(date[:20]), 'w') as file:
                 file.write (self.data)
         except:
             msg1 = QMessageBox ()
@@ -320,6 +322,10 @@ class ChildWindow (QDialog):
         self.close ()
 
     def saveMongo(self):
+        """
+        Class for saving to MongoDB
+        first need connect db
+        """
         try:
             client = pymongo.MongoClient('mongodb://localhost:27017/')
             db = client.user_db

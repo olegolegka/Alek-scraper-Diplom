@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 from PyQt5 import QtCore
+from random import randint
 class Scraper(QtCore.QThread):
     """ Class for scraping webpages
 
@@ -29,12 +30,12 @@ class Scraper(QtCore.QThread):
         self.data = ""
         self.list_of_selectors = []
         separator = int(self.sep)
-
         try:
             for i in range(0,separator,1):
                 url = self.url
                 url = url + str(i+1)
-                r = requests.get(url,timeout=5)
+                out = randint(2,6)
+                r = requests.get(url,timeout=out)
                 page = BeautifulSoup (r.content, "html.parser")
                 self.modify ()
                 self.scrape (url, page, 0, len (self.CSSSelectors) - 1, self.CSSSelectors)
@@ -71,6 +72,7 @@ class Scraper(QtCore.QThread):
             hi        : highest index of the list of selectors
             selectors : the actual list of selectors (created from user input)
         """
+        print("scraping from"+str(url))
         if index > hi:
             self.list_of_selectors.append((selectors[hi],soup.get_text()))
             text = soup.get_text()
@@ -83,9 +85,10 @@ class Scraper(QtCore.QThread):
                 href = ele.get('href')
                 new_url = urljoin(url,href)
                 try:
-                    req = requests.get(new_url,timeout=5)
+                    out = randint(2,6)
+                    req = requests.get(new_url,timeout=out)
                 except:
-                    self.data = "Connection Refused - Could not Scrape"
+                    self.data += "Connection Refused - Could not Scrape"
                     print("Connection Refused")
                     return
                 new_soup = BeautifulSoup(req.content,"html.parser")
